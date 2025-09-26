@@ -1,6 +1,5 @@
 package br.com.solutionsnote.note.controller;
 
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
@@ -9,22 +8,19 @@ public class HomeController {
 
     /**
      * Página inicial
-     * - Se o usuário estiver logado, manda para /automoveis-ui
-     * - Caso contrário, envia para tela de login
+     * Sem autenticação: redireciona direto para a UI.
      */
     @GetMapping("/")
-    public String index(Authentication authentication) {
-        if (authentication != null && authentication.isAuthenticated()) {
-            return "redirect:/automoveis-ui";
-        }
-        return "redirect:/login";
+    public String index() {
+        return "redirect:/automoveis-ui";
     }
 
     /**
-     * Página de login personalizada (login.html)
+     * Rota de /login mantida apenas para compatibilidade.
+     * Como não há mais security, redireciona para a UI.
      */
     @GetMapping("/login")
     public String login() {
-        return "login"; // templates/login.html
+        return "redirect:/automoveis-ui";
     }
 }
