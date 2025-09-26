@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Login - Solutions Note</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f6fa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .login-container {
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            width: 350px;
+            text-align: center;
+        }
+        .login-container h2 {
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+        .login-container .alert {
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+        .alert-error {
+            background-color: #ffdddd;
+            color: #c0392b;
+        }
+        .alert-success {
+            background-color: #ddffdd;
+            color: #27ae60;
+        }
+        .login-container input[type="text"],
+        .login-container input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .login-container button {
+            width: 100%;
+            padding: 10px;
+            background: #3498db;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        .login-container button:hover {
+            background: #2980b9;
+        }
+        .login-footer {
+            margin-top: 15px;
+            font-size: 13px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+<div class="login-container">
+    <h2>Solutions Note</h2>
+
+    <!-- Mensagem de erro ao falhar login -->
+    <div th:if="${param.error}" class="alert alert-error">
+        Usuário ou senha inválidos. Tente novamente.
+    </div>
+
+    <!-- Mensagem ao deslogar -->
+    <div th:if="${param.logout}" class="alert alert-success">
+        Você saiu do sistema com sucesso.
+    </div>
+
+    <form th:action="@{/login}" method="post">
+        <input type="text" name="username" placeholder="Usuário" required autofocus>
+        <input type="password" name="password" placeholder="Senha" required>
+        <button type="submit">Entrar</button>
+    </form>
+
+    <div class="login-footer">
+        <p>Sistema protegido por autenticação.</p>
+    </div>
+</div>
+</body>
+</html>
