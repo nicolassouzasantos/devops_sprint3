@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 
 @Entity
-@Table(name = "OPERADOR")
+@Table(name = "operador")
 public class Operador {
 
     @Id
@@ -23,10 +23,10 @@ public class Operador {
     @JsonIgnore // evita expor a senha no GET
     private String senha;
 
-    @Column(name = "PAPEL", nullable = false)
-    private String papel = "ROLE_USER"; // ROLE_USER ou ROLE_ADMIN
+    @Column(name = "papel", nullable = false)
+    private String papel = "role_user"; // ROLE_USER ou ROLE_ADMIN
 
-    @Column(name = "HABILITADO", nullable = false)
+    @Column(name = "habilitado", nullable = false)
     private boolean habilitado = true;
 
     // getters e setters
