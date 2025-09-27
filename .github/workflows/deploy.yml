@@ -1,42 +1,39 @@
-name: Build & Deploy to Azure Web App
+name: Build & Deploy (OIDC)
 
 on:
   push:
-    branches: [ "main" ]   # troque se seu branch principal for outro
-  workflow_dispatch:        # permite rodar manualmente
+    branches: [ "main" ]
+  workflow_dispatch:
+
+env:
+  AZURE_WEBAPP_NAME: app-devops-sprint3-10054
+  PACKAGE_PATH: target/*.jar
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      # Cache do Maven acelera builds
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "17"
           cache: maven
+      - run: mvn -B -DskipTests package
 
-      # Se seu projeto usa wrapper, isso já funciona;
-      # caso contrário, mude para 'mvn -B -DskipTests package'
-      - name: Build with Maven
-        run: ./mvnw -B -DskipTests package
-
-      # (Opcional) publique o artefato para inspeção/rollback manual
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
         with:
-          name: app-jar
-          path: target/*.jar
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      # Deploy do JAR para o App Service
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
-          app-name: app-devops-sprint3-10054
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: target/*.jar
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          package: ${{ env.PACKAGE_PATH }}
