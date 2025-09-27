@@ -77,3 +77,27 @@ Body (JSON):
   "comentarios": "Nova, sem observações",
   "patioId": 1
 }
+
+## Configuração do banco de dados PostgreSQL
+
+O projeto está configurado para utilizar PostgreSQL em qualquer ambiente, incluindo o Azure App Service. Por padrão, os parâmetros de conexão podem ser definidos através das seguintes variáveis de ambiente:
+
+- `SPRING_DATASOURCE_URL` (ou `POSTGRES_HOST`, `POSTGRES_PORT` e `POSTGRES_DB`)
+- `SPRING_DATASOURCE_USERNAME` (ou `POSTGRES_USER`)
+- `SPRING_DATASOURCE_PASSWORD` (ou `POSTGRES_PASSWORD`)
+
+Para desenvolvimento local é possível utilizar um banco PostgreSQL na máquina ou em contêiner. Um exemplo de configuração com docker-compose seria:
+
+```yaml
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: note
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+```
+
+Ao publicar no Azure App Service, configure as variáveis de ambiente do aplicativo ou utilize a cadeia de conexão fornecida pelo serviço Banco de Dados PostgreSQL.
