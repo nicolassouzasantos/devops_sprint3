@@ -12,17 +12,20 @@ env:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+
     permissions:
-      id-token: write
+      id-token: write     # OBRIGATÓRIO p/ OIDC
       contents: read
 
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "17"
           cache: maven
+
       - run: mvn -B -DskipTests package
 
       - name: Azure Login (OIDC)
@@ -37,3 +40,4 @@ jobs:
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           package: ${{ env.PACKAGE_PATH }}
+          # slot-name: staging   # se for usar slot
