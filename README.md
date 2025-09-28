@@ -29,7 +29,7 @@ No terminal Azure
 
 # Passo 1:
 
-export PREFIX="note$RANDOM"    
+export PREFIX="notesolutions"    
 
 export LOC="brazilsouth"          
 
