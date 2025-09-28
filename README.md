@@ -1,4 +1,4 @@
-devops_sprint3
+# devops_sprint3
 
 API REST de gestão de Pátios, Automóveis e Operadores (Java 17 + Spring Boot + JPA + PostgreSQL). Contém endpoints públicos para CRUD, paginação e filtros.
 
