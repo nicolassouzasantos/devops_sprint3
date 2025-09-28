@@ -25,9 +25,9 @@ Maven 3.9+
 PostgreSQL 13+ (ou Docker)
 
 # ☁️ Deploy no Azure (CLI)
-# No terminal Azure
+No terminal Azure
 
-Passo 1:
+# Passo 1:
 
 export PREFIX="note$RANDOM"            
 export LOC="brazilsouth"              
@@ -41,12 +41,12 @@ export PLAN="${PREFIX}-plan"
 export APP="${PREFIX}-app"            
 
 
-Passo 2:
+# Passo 2:
 
 az group create -n $RG -l $LOC
 
 
-Passo 3:
+# Passo 3:
 
 az postgres flexible-server create \
   -g $RG -n $PGSERVER -l $LOC \
@@ -56,21 +56,21 @@ az postgres flexible-server create \
 az postgres flexible-server db create -g $RG -s $PGSERVER -d $DBNAME
 
 
-Passo 4:
+# Passo 4:
 
 az postgres flexible-server firewall-rule create \
   -g $RG -n $PGSERVER \
   -r AllowAllAzureIPs --start-ip-address 0.0.0.0 --end-ip-address 0.0.0.0
 
 
-Passo 5:
+# Passo 5:
 
 az appservice plan create -g $RG -n $PLAN --is-linux --sku B1
 
 az webapp create -g $RG -p $PLAN -n $APP --runtime "JAVA|17-java17"
 
 
-Passo 6:
+# Passo 6:
 
 export JDBC_URL="jdbc:postgresql://$PGSERVER.postgres.database.azure.com:5432/$DBNAME?sslmode=require"
 
@@ -82,7 +82,7 @@ az webapp config appsettings set -g $RG -n $APP --settings \
   SCM_DO_BUILD_DURING_DEPLOYMENT=false
 
 
-Passo 7:
+# Passo 7:
 
 git clone https://github.com/nicolassouzasantos/devops_sprint3
 cd devops_sprint3
@@ -93,70 +93,24 @@ chmod +x mvnw || true
 ls -lh target/*.jar
 
 
-Passo 8:
+# Passo 8:
 
 JAR_PATH=$(ls target/*.jar | head -n1)
 
 az webapp deploy -g $RG -n $APP --src-path "$JAR_PATH" --type jar
 
 
-Passo 9:
+# Passo 9:
 
 https://$PGSERVER-app.azurewebsites.net/
 anotar URL no retorno para os testes
 
 
-📚 Convenções da API
-
-Base URL (local): http://localhost:8080
-
-Base URL (Azure): https://<seu-app>.azurewebsites.net
-
-Content-Type: application/json
-
-Paginação padrão: page=0&size=10
-
-Ordenação: sort=campo,asc|desc
-
-🧩 Entidades
-Pátio
-{
-  "id": 1,
-  "nome": "Pátio Central",
-  "endereco": "Av. Exemplo, 123 - São Paulo/SP"
-}
-
-Operador
-{
-  "id": 1,
-  "nome": "João Silva",
-  "login": "joao",
-  "senha": "hash",
-  "papel": "ROLE_USER" // ou ROLE_ADMIN
-}
-
-Automóvel
-{
-  "id": 1,
-  "placa": "ABC1D23",
-  "chassi": "9BWZZZ377VT004251",
-  "tipo": "Moto",
-  "cor": "Preto",
-  "localizacaoNoPatio": "Fileira A - Vaga 05",
-  "comentarios": "Observações",
-  "patio": { "id": 1 }   // ou patioId: 1, conforme seu DTO
-}
-
-🔗 Endpoints e Testes (HTTP)
-
-A seguir estão testes de POST, GET, PUT e DELETE para cada entidade.
-Alguns desses endpoints e exemplos já existiam no README do projeto (p.ex. listar automóveis com paginação e filtros por placa). 
-GitHub
-
-🧪 TESTES HTTP
+# 🧪 TESTES HTTP
 
 POST {URL-AZURE}/operadores
 1)
+
 {
   "nome": "João Silva",
   "login": "joao",
@@ -165,19 +119,24 @@ POST {URL-AZURE}/operadores
 }
 
 2)
+
 {
   "nome": "Maria Souza",
   "login": "maria",
   "senha": "Segredo!456"
 }
 
+
 POST {URL-AZURE}/patios
+
 1)
+
 {
   "nome": "Pátio Central"
 }
 
 2)
+
 {
   "nome": "Pátio Zona Norte",
   "endereco": "Av. Exemplo, 123 - São Paulo/SP"
@@ -185,7 +144,9 @@ POST {URL-AZURE}/patios
 
 
 POST {URL-AZURE}/automoveis
+
 1)
+
 {
   "placa": "ABC1D23",
   "chassi": "9BWZZZ377VT004251",
@@ -198,6 +159,7 @@ POST {URL-AZURE}/automoveis
 
 
 2)
+
 {
   "placa": "FTL7Y54",
   "chassi": "ECECECV7VT004251",
@@ -209,9 +171,13 @@ POST {URL-AZURE}/automoveis
 }
 
 GET:
+
 {URL-AZURE}/operadores
+
 {URL-AZURE}/patios
+
 {URL-AZURE}/automoveis
+
 
 ✅ Casos de erro sugeridos (para validar a API)
 
