@@ -5,8 +5,6 @@ import br.com.solutionsnote.note.repository.OperadorRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,16 +16,13 @@ public class OperadorController {
     @Autowired
     private OperadorRepository repository;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
     // LISTAR TODOS
     @GetMapping
     public List<Operador> listar() {
         return repository.findAll();
     }
 
-    // OBTER POR ID (para você testar no navegador com GET)
+    // OBTER POR ID
     @GetMapping("/{id}")
     public ResponseEntity<Operador> obter(@PathVariable Long id) {
         return repository.findById(id)
@@ -36,20 +31,17 @@ public class OperadorController {
     }
 
     // CRIAR
-    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public Operador salvar(@RequestBody @Valid Operador operador) {
-        // hash da senha
-        operador.setSenha(passwordEncoder.encode(operador.getSenha()));
-        // papel default
+        // papel default se vier vazio
         if (operador.getPapel() == null || operador.getPapel().isBlank()) {
             operador.setPapel("ROLE_USER");
         }
+        // ATENÇÃO: sem Security, a senha será salva em texto puro.
         return repository.save(operador);
     }
 
     // ATUALIZAR
-    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<Operador> atualizar(@PathVariable Long id,
                                               @RequestBody @Valid Operador operadorAtualizado) {
@@ -62,9 +54,10 @@ public class OperadorController {
                         operador.setLogin(operadorAtualizado.getLogin());
                     }
                     if (operadorAtualizado.getSenha() != null && !operadorAtualizado.getSenha().isBlank()) {
-                        operador.setSenha(passwordEncoder.encode(operadorAtualizado.getSenha()));
+                        // Sem encode: grava como veio
+                        operador.setSenha(operadorAtualizado.getSenha());
                     }
-                    if (operadorAtualizado.getPapel() != null) {
+                    if (operadorAtualizado.getPapel() != null && !operadorAtualizado.getPapel().isBlank()) {
                         operador.setPapel(operadorAtualizado.getPapel());
                     }
                     Operador salvo = repository.save(operador);
@@ -73,6 +66,7 @@ public class OperadorController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    // DELETAR
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletar(@PathVariable Long id) {
         if (repository.existsById(id)) {
