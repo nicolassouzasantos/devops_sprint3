@@ -24,20 +24,20 @@ Maven 3.9+
 
 PostgreSQL 13+ (ou Docker)
 
-☁️ Deploy no Azure (CLI)
-No terminal Azure
+# ☁️ Deploy no Azure (CLI)
+# No terminal Azure
 
 Passo 1:
-export PREFIX="note$RANDOM"            # deixa nomes únicos
-export LOC="brazilsouth"               # ou eastus, etc.
+export PREFIX="note$RANDOM"            
+export LOC="brazilsouth"              
 export RG="${PREFIX}-rg"
-export PGSERVER="${PREFIX}-pg"         # minúsculas, sem underline
+export PGSERVER="${PREFIX}-pg"         
 export PGADMIN="pgadmin"
 export PGPASS="$(openssl rand -base64 18)Aa1!"
 export DBNAME="note"
 
 export PLAN="${PREFIX}-plan"
-export APP="${PREFIX}-app"             # precisa ser único globalmente
+export APP="${PREFIX}-app"            
 
 
 Passo 2:
@@ -49,7 +49,7 @@ az postgres flexible-server create \
   -g $RG -n $PGSERVER -l $LOC \
   --admin-user $PGADMIN --admin-password "$PGPASS" \
   --tier Burstable --sku-name Standard_B1ms --version 16 --yes
-# cria o banco (sem precisar abrir firewall para seu IP)
+  
 az postgres flexible-server db create -g $RG -s $PGSERVER -d $DBNAME
 
 
@@ -62,7 +62,6 @@ az postgres flexible-server firewall-rule create \
 Passo 5:
 az appservice plan create -g $RG -n $PLAN --is-linux --sku B1
 
-# crie o Web App já com runtime Java 17 (Java SE)
 az webapp create -g $RG -p $PLAN -n $APP --runtime "JAVA|17-java17"
 
 
@@ -81,11 +80,9 @@ Passo 7:
 git clone https://github.com/nicolassouzasantos/devops_sprint3
 cd devops_sprint3
 
-# build com o wrapper para evitar depender do Maven externo
 chmod +x mvnw || true
 ./mvnw -ntp -DskipTests clean package
 
-# verifique o artefato gerado
 ls -lh target/*.jar
 
 
