@@ -1,103 +1,231 @@
-Nicolas Souza dos Santos - rm555571
-Oscar Arias Neto - rm556936
-Julia Martins Rebelles - rm554516
+devops_sprint3
 
-Testes endpoints:
-POST:
+API REST de gestão de Pátios, Automóveis e Operadores (Java 17 + Spring Boot + JPA + PostgreSQL). Contém endpoints públicos para CRUD, paginação e filtros.
 
-1- patios: http://localhost:8080/patios
+Integrantes: Nicolas Souza dos Santos (RM 555571), Oscar Arias Neto (RM 556936), Julia Martins Rebelles (RM 554516).
+Endpoints e exemplos foram inspirados nos rascunhos já presentes no repositório. 
+GitHub
+
+🧱 Tech Stack
+
+Java 17, Spring Boot (Web, Validation, Data JPA)
+
+PostgreSQL 16 (local/Docker/Azure Database for PostgreSQL Flexible Server)
+
+Build: Maven
+
+Deploy: Azure App Service (Linux/Java 17)
+
+📦 Requisitos
+
+Java 17
+
+Maven 3.9+
+
+PostgreSQL 13+ (ou Docker)
+
+☁️ Deploy no Azure (CLI)
+No terminal Azure
+
+Passo 1:
+export PREFIX="note$RANDOM"            # deixa nomes únicos
+export LOC="brazilsouth"               # ou eastus, etc.
+export RG="${PREFIX}-rg"
+export PGSERVER="${PREFIX}-pg"         # minúsculas, sem underline
+export PGADMIN="pgadmin"
+export PGPASS="$(openssl rand -base64 18)Aa1!"
+export DBNAME="note"
+
+export PLAN="${PREFIX}-plan"
+export APP="${PREFIX}-app"             # precisa ser único globalmente
+
+
+Passo 2:
+az group create -n $RG -l $LOC
+
+
+Passo 3:
+az postgres flexible-server create \
+  -g $RG -n $PGSERVER -l $LOC \
+  --admin-user $PGADMIN --admin-password "$PGPASS" \
+  --tier Burstable --sku-name Standard_B1ms --version 16 --yes
+# cria o banco (sem precisar abrir firewall para seu IP)
+az postgres flexible-server db create -g $RG -s $PGSERVER -d $DBNAME
+
+
+Passo 4:
+az postgres flexible-server firewall-rule create \
+  -g $RG -n $PGSERVER \
+  -r AllowAllAzureIPs --start-ip-address 0.0.0.0 --end-ip-address 0.0.0.0
+
+
+Passo 5:
+az appservice plan create -g $RG -n $PLAN --is-linux --sku B1
+
+# crie o Web App já com runtime Java 17 (Java SE)
+az webapp create -g $RG -p $PLAN -n $APP --runtime "JAVA|17-java17"
+
+
+Passo 6:
+export JDBC_URL="jdbc:postgresql://$PGSERVER.postgres.database.azure.com:5432/$DBNAME?sslmode=require"
+
+az webapp config appsettings set -g $RG -n $APP --settings \
+  SPRING_DATASOURCE_URL="$JDBC_URL" \
+  SPRING_DATASOURCE_USERNAME="$PGADMIN" \
+  SPRING_DATASOURCE_PASSWORD="$PGPASS" \
+  JAVA_OPTS="-Xms256m -Xmx512m" \
+  SCM_DO_BUILD_DURING_DEPLOYMENT=false
+
+
+Passo 7:
+git clone https://github.com/nicolassouzasantos/devops_sprint3
+cd devops_sprint3
+
+# build com o wrapper para evitar depender do Maven externo
+chmod +x mvnw || true
+./mvnw -ntp -DskipTests clean package
+
+# verifique o artefato gerado
+ls -lh target/*.jar
+
+
+Passo 8:
+JAR_PATH=$(ls target/*.jar | head -n1)
+
+az webapp deploy -g $RG -n $APP --src-path "$JAR_PATH" --type jar
+
+
+Passo 10:
+https://$PGSERVER-app.azurewebsites.net/
+anotar URL no retorno para os testes
+
+
+📚 Convenções da API
+
+Base URL (local): http://localhost:8080
+
+Base URL (Azure): https://<seu-app>.azurewebsites.net
+
+Content-Type: application/json
+
+Paginação padrão: page=0&size=10
+
+Ordenação: sort=campo,asc|desc
+
+🧩 Entidades
+Pátio
+{
+  "id": 1,
+  "nome": "Pátio Central",
+  "endereco": "Av. Exemplo, 123 - São Paulo/SP"
+}
+
+Operador
+{
+  "id": 1,
+  "nome": "João Silva",
+  "login": "joao",
+  "senha": "hash",
+  "papel": "ROLE_USER" // ou ROLE_ADMIN
+}
+
+Automóvel
+{
+  "id": 1,
+  "placa": "ABC1D23",
+  "chassi": "9BWZZZ377VT004251",
+  "tipo": "Moto",
+  "cor": "Preto",
+  "localizacaoNoPatio": "Fileira A - Vaga 05",
+  "comentarios": "Observações",
+  "patio": { "id": 1 }   // ou patioId: 1, conforme seu DTO
+}
+
+🔗 Endpoints e Testes (HTTP)
+
+A seguir estão testes de POST, GET, PUT e DELETE para cada entidade.
+Alguns desses endpoints e exemplos já existiam no README do projeto (p.ex. listar automóveis com paginação e filtros por placa). 
+GitHub
+
+🧪 TESTES HTTP
+
+POST {URL-AZURE}/operadores
+1)
+{
+  "nome": "João Silva",
+  "login": "joao",
+  "senha": "SenhaForte@123",
+  "papel": "ROLE_ADMIN"
+}
+
+2)
+{
+  "nome": "Maria Souza",
+  "login": "maria",
+  "senha": "Segredo!456"
+}
+
+POST {URL-AZURE}/patios
+1)
 {
   "nome": "Pátio Central"
 }
 
-2- operadores: http://localhost:8080/operadores
+2)
 {
-  "nome": "João Silva",
+  "nome": "Pátio Zona Norte",
+  "endereco": "Av. Exemplo, 123 - São Paulo/SP"
+}
+
+
+POST {URL-AZURE}/automoveis
+1)
+{
+  "placa": "ABC1D23",
+  "chassi": "9BWZZZ377VT004251",
+  "tipo": "Moto",
+  "cor": "Preto",
+  "localizacaoNoPatio": "Fileira A - Vaga 05",
+  "comentarios": "Chegou com arranhões no tanque",
   "patioId": 1
 }
 
-3- automovel: http://localhost:8080/automoveis
+
+2)
 {
-  "placa": "ABC1234",
-  "chassi": "9BWZZZ377VT004251",
-  "tipo": "Scooter",
-  "cor": "Vermelha",
-  "localizacao": "Setor A - Vaga 12",
-  "comentarios": "Moto com arranhões leves",
-  "patioId": 1
+  "placa": "FTL7Y54",
+  "chassi": "ECECECV7VT004251",
+  "tipo": "Moto",
+  "cor": "Azul",
+  "localizacaoNoPatio": "Fileira B - Vaga 0",
+  "comentarios": "Chegou inteiro",
+  "patioId": 2
 }
 
 GET:
--Listar todos os pátios
-GET http://localhost:8080/patios
+{URL-AZURE}/operadores
+{URL-AZURE}/patios
+{URL-AZURE}/automoveis
 
--Buscar pátio por ID
-GET http://localhost:8080/patios/1
+✅ Casos de erro sugeridos (para validar a API)
 
--Listar todos os operadores
-GET http://localhost:8080/operadores
+400 Bad Request: corpo inválido / campos obrigatórios ausentes:
 
--Buscar operador por ID
-GET http://localhost:8080/operadores/1
+Operador sem login ou senha
 
--Listar todos os automóveis (com paginação e ordenação)
-GET http://localhost:8080/automoveis?page=0&size=10&sort=placa,asc
+Automóvel sem placa/chassi/tipo
 
--Buscar automóvel por ID
-GET http://localhost:8080/automoveis/1
+Pátio com nome vazio
 
--Buscar automóveis por placa (ex: ABC1234)
-GET http://localhost:8080/automoveis?placa=ABC1234
+404 Not Found:
 
-PUT:
--Atualizar pátio
-PUT http://localhost:8080/patios/1
-Body (JSON):
-{
-  "nome": "Pátio Norte"
-}
+Atualizar/Deletar um ID inexistente
 
--Atualizar operador
-PUT http://localhost:8080/operadores/1
-Body (JSON):
-{
-  "nome": "João Mendes",
-  "patioId": 1
-}
+Automóvel com patioId que não existe
 
--Atualizar automóvel
-PUT http://localhost:8080/automoveis/1
-Body (JSON):
-{
-  "placa": "DEF5678",
-  "chassi": "9BWZZZ377VT004252",
-  "tipo": "Trail",
-  "cor": "Preta",
-  "localizacao": "Setor B - Vaga 5",
-  "comentarios": "Nova, sem observações",
-  "patioId": 1
-}
+409 Conflict:
 
-## Configuração do banco de dados PostgreSQL
+Cadastrar placa ou chassi já existentes (se tiver UNIQUE)
 
-O projeto está configurado para utilizar PostgreSQL em qualquer ambiente, incluindo o Azure App Service. Por padrão, os parâmetros de conexão podem ser definidos através das seguintes variáveis de ambiente:
 
-- `SPRING_DATASOURCE_URL` (ou `POSTGRES_HOST`, `POSTGRES_PORT` e `POSTGRES_DB`)
-- `SPRING_DATASOURCE_USERNAME` (ou `POSTGRES_USER`)
-- `SPRING_DATASOURCE_PASSWORD` (ou `POSTGRES_PASSWORD`)
 
-Para desenvolvimento local é possível utilizar um banco PostgreSQL na máquina ou em contêiner. Um exemplo de configuração com docker-compose seria:
-
-```yaml
-services:
-  db:
-    image: postgres:16
-    environment:
-      POSTGRES_DB: note
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    ports:
-      - "5432:5432"
-```
-
-Ao publicar no Azure App Service, configure as variáveis de ambiente do aplicativo ou utilize a cadeia de conexão fornecida pelo serviço Banco de Dados PostgreSQL.
