@@ -28,6 +28,7 @@ PostgreSQL 13+ (ou Docker)
 # No terminal Azure
 
 Passo 1:
+
 export PREFIX="note$RANDOM"            
 export LOC="brazilsouth"              
 export RG="${PREFIX}-rg"
@@ -41,10 +42,12 @@ export APP="${PREFIX}-app"
 
 
 Passo 2:
+
 az group create -n $RG -l $LOC
 
 
 Passo 3:
+
 az postgres flexible-server create \
   -g $RG -n $PGSERVER -l $LOC \
   --admin-user $PGADMIN --admin-password "$PGPASS" \
@@ -54,18 +57,21 @@ az postgres flexible-server db create -g $RG -s $PGSERVER -d $DBNAME
 
 
 Passo 4:
+
 az postgres flexible-server firewall-rule create \
   -g $RG -n $PGSERVER \
   -r AllowAllAzureIPs --start-ip-address 0.0.0.0 --end-ip-address 0.0.0.0
 
 
 Passo 5:
+
 az appservice plan create -g $RG -n $PLAN --is-linux --sku B1
 
 az webapp create -g $RG -p $PLAN -n $APP --runtime "JAVA|17-java17"
 
 
 Passo 6:
+
 export JDBC_URL="jdbc:postgresql://$PGSERVER.postgres.database.azure.com:5432/$DBNAME?sslmode=require"
 
 az webapp config appsettings set -g $RG -n $APP --settings \
@@ -77,6 +83,7 @@ az webapp config appsettings set -g $RG -n $APP --settings \
 
 
 Passo 7:
+
 git clone https://github.com/nicolassouzasantos/devops_sprint3
 cd devops_sprint3
 
@@ -87,12 +94,14 @@ ls -lh target/*.jar
 
 
 Passo 8:
+
 JAR_PATH=$(ls target/*.jar | head -n1)
 
 az webapp deploy -g $RG -n $APP --src-path "$JAR_PATH" --type jar
 
 
-Passo 10:
+Passo 9:
+
 https://$PGSERVER-app.azurewebsites.net/
 anotar URL no retorno para os testes
 
