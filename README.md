@@ -98,23 +98,24 @@ JAR_PATH=$(ls target/*.jar | head -n1)
 
 az webapp deploy -g $RG -n $APP --src-path "$JAR_PATH" --type jar
 
-
-# Passo 9:
-
-https://$PGSERVER-app.azurewebsites.net/
-
-URL-AZURE: https://$PGSERVER-app.azurewebsites.net/
-
-anotar URL no retorno para os testes
-
 # Para conectar ao banco no azure CLI:
 FQDN=$(az postgres flexible-server show -g "$RG" -n "$PGSERVER" --query fullyQualifiedDomainName -o tsv)
 
-psql "host=$FQDN port=5432 dbname=$DBNAME user=${PGADMIN}@$PGSERVER sslmode=require"
+psql "host=$FQDN port=5432 dbname=$DBNAME user=${PGADMIN} sslmode=require"
+
+
+# Selects no banco de dados:
+
+select * from operador;
+
+select * from patio;
+
+select * from automovel;
+
 
 # 🧪 TESTES HTTP
 
-# POST {URL-AZURE}/operadores
+# POST http://notesolutions-app.azurewebsites.net/operadores
 
 JSON:
 
@@ -133,8 +134,17 @@ JSON:
   "senha": "Segredo!456"
 }
 
+# PUT http://notesolutions-app.azurewebsites.net/operadores/id
 
-# POST {URL-AZURE}/patios
+{
+  "nome": "Teste",
+  "login": "teste",
+  "senha": "Segredo!456"
+}
+
+# DELETE http://notesolutions-app.azurewebsites.net/operadores/id
+
+# POST http://notesolutions-app.azurewebsites.net/patios
 
 JSON:
 
@@ -150,7 +160,7 @@ JSON:
 }
 
 
-# POST {URL-AZURE}/automoveis
+# POST http://notesolutions-app.azurewebsites.net/automoveis
 
 JSON:
 
@@ -179,11 +189,11 @@ JSON:
 
 GET:
 
-{URL-AZURE}/operadores
+http://notesolutions-app.azurewebsites.net/operadores
 
-{URL-AZURE}/patios
+http://notesolutions-app.azurewebsites.net/patios
 
-{URL-AZURE}/automoveis
+http://notesolutions-app.azurewebsites.net/automoveis
 
 
 ✅ Casos de erro sugeridos (para validar a API)
