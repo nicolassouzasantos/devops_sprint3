@@ -103,14 +103,16 @@ az webapp deploy -g $RG -n $APP --src-path "$JAR_PATH" --type jar
 # Passo 9:
 
 https://$PGSERVER-app.azurewebsites.net/
+
+URL-AZURE: https://$PGSERVER-app.azurewebsites.net/
 anotar URL no retorno para os testes
 
 
 # 🧪 TESTES HTTP
 
-POST {URL-AZURE}/operadores
-1)
+# POST {URL-AZURE}/operadores
 
+JSON:
 {
   "nome": "João Silva",
   "login": "joao",
@@ -118,7 +120,7 @@ POST {URL-AZURE}/operadores
   "papel": "ROLE_ADMIN"
 }
 
-2)
+JSON:
 
 {
   "nome": "Maria Souza",
@@ -127,15 +129,15 @@ POST {URL-AZURE}/operadores
 }
 
 
-POST {URL-AZURE}/patios
+# POST {URL-AZURE}/patios
 
-1)
+JSON:
 
 {
   "nome": "Pátio Central"
 }
 
-2)
+JSON:
 
 {
   "nome": "Pátio Zona Norte",
@@ -143,9 +145,9 @@ POST {URL-AZURE}/patios
 }
 
 
-POST {URL-AZURE}/automoveis
+# POST {URL-AZURE}/automoveis
 
-1)
+JSON:
 
 {
   "placa": "ABC1D23",
@@ -158,7 +160,7 @@ POST {URL-AZURE}/automoveis
 }
 
 
-2)
+JSON:
 
 {
   "placa": "FTL7Y54",
