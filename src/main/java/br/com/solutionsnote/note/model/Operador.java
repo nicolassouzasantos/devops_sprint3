@@ -4,7 +4,9 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 
 @Entity
+@Table(name = "operador")
 public class Operador {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -18,6 +20,11 @@ public class Operador {
     @NotBlank
     private String senha;
 
+    // Campo responsável pelo papel do usuário
+    @Column(nullable = false)
+    private String papel;
+
+    // GETTERS e SETTERS
     public Long getId() {
         return id;
     }
@@ -48,5 +55,14 @@ public class Operador {
 
     public void setSenha(String senha) {
         this.senha = senha;
+    }
+
+    // >>> AQUI ESTÁ O MÉTODO QUE VOCÊ PRECISA <<<
+    public String getPapel() {
+        return papel;
+    }
+
+    public void setPapel(String papel) {
+        this.papel = papel;
     }
 }
