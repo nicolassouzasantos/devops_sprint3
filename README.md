@@ -107,6 +107,9 @@ https://$PGSERVER-app.azurewebsites.net/
 URL-AZURE: https://$PGSERVER-app.azurewebsites.net/
 anotar URL no retorno para os testes
 
+# Para conectar ao banco no azure CLI:
+FQDN=$(az postgres flexible-server show -g "$RG" -n "$PGSERVER" --query fullyQualifiedDomainName -o tsv)
+psql "host=$FQDN port=5432 dbname=$DBNAME user=${PGADMIN}@$PGSERVER sslmode=require"
 
 # 🧪 TESTES HTTP
 
