@@ -39,7 +39,7 @@ export PGSERVER="${PREFIX}-pg"
 
 export PGADMIN="pgadmin"
 
-export PGPASS="$(openssl rand -base64 18)Aa1!"
+export PGPASS="Teste123@"
 
 export DBNAME="note"
 
