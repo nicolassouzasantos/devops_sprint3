@@ -113,6 +113,7 @@ anotar URL no retorno para os testes
 # POST {URL-AZURE}/operadores
 
 JSON:
+
 {
   "nome": "João Silva",
   "login": "joao",
