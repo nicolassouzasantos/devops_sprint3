@@ -55,19 +55,14 @@ az group create -n $RG -l $LOC
 
 # Passo 3:
 
-az postgres flexible-server create \
-  -g $RG -n $PGSERVER -l $LOC \
-  --admin-user $PGADMIN --admin-password "$PGPASS" \
-  --tier Burstable --sku-name Standard_B1ms --version 16 --yes
+az postgres flexible-server create -g $RG -n $PGSERVER -l $LOC --admin-user $PGADMIN --admin-password "$PGPASS" --tier Burstable --sku-name Standard_B1ms --version 16 --yes
   
 az postgres flexible-server db create -g $RG -s $PGSERVER -d $DBNAME
 
 
 # Passo 4:
 
-az postgres flexible-server firewall-rule create \
-  -g $RG -n $PGSERVER \
-  -r AllowAllAzureIPs --start-ip-address 0.0.0.0 --end-ip-address 0.0.0.0
+az postgres flexible-server firewall-rule create -g $RG -n $PGSERVER -r AllowAllAzureIPs --start-ip-address 0.0.0.0 --end-ip-address 0.0.0.0
 
 
 # Passo 5:
@@ -81,12 +76,7 @@ az webapp create -g $RG -p $PLAN -n $APP --runtime "JAVA|17-java17"
 
 export JDBC_URL="jdbc:postgresql://$PGSERVER.postgres.database.azure.com:5432/$DBNAME?sslmode=require"
 
-az webapp config appsettings set -g $RG -n $APP --settings \
-  SPRING_DATASOURCE_URL="$JDBC_URL" \
-  SPRING_DATASOURCE_USERNAME="$PGADMIN" \
-  SPRING_DATASOURCE_PASSWORD="$PGPASS" \
-  JAVA_OPTS="-Xms256m -Xmx512m" \
-  SCM_DO_BUILD_DURING_DEPLOYMENT=false
+az webapp config appsettings set -g $RG -n $APP --settings SPRING_DATASOURCE_URL="$JDBC_URL" SPRING_DATASOURCE_USERNAME="$PGADMIN" SPRING_DATASOURCE_PASSWORD="$PGPASS" JAVA_OPTS="-Xms256m -Xmx512m" SCM_DO_BUILD_DURING_DEPLOYMENT=false
 
 
 # Passo 7:
