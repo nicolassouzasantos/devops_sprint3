@@ -29,15 +29,22 @@ No terminal Azure
 
 # Passo 1:
 
-export PREFIX="note$RANDOM"            
-export LOC="brazilsouth"              
+export PREFIX="note$RANDOM"    
+
+export LOC="brazilsouth"          
+
 export RG="${PREFIX}-rg"
+
 export PGSERVER="${PREFIX}-pg"         
+
 export PGADMIN="pgadmin"
+
 export PGPASS="$(openssl rand -base64 18)Aa1!"
+
 export DBNAME="note"
 
 export PLAN="${PREFIX}-plan"
+
 export APP="${PREFIX}-app"            
 
 
@@ -85,9 +92,11 @@ az webapp config appsettings set -g $RG -n $APP --settings \
 # Passo 7:
 
 git clone https://github.com/nicolassouzasantos/devops_sprint3
+
 cd devops_sprint3
 
 chmod +x mvnw || true
+
 ./mvnw -ntp -DskipTests clean package
 
 ls -lh target/*.jar
@@ -105,6 +114,7 @@ az webapp deploy -g $RG -n $APP --src-path "$JAR_PATH" --type jar
 https://$PGSERVER-app.azurewebsites.net/
 
 URL-AZURE: https://$PGSERVER-app.azurewebsites.net/
+
 anotar URL no retorno para os testes
 
 # Para conectar ao banco no azure CLI:
