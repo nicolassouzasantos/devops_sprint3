@@ -59,6 +59,7 @@ az postgres flexible-server create \
   -g $RG -n $PGSERVER -l $LOC \
   --admin-user $PGADMIN --admin-password "$PGPASS" \
   --tier Burstable --sku-name Standard_B1ms --version 16 --yes
+  
 az postgres flexible-server db create -g $RG -s $PGSERVER -d $DBNAME
 
 
