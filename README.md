@@ -1,6 +1,8 @@
-# devops_sprint3
+# devops_sprint4
 
-# LINK VÍDEO DO PROJETO: https://youtu.be/MZWizTH0pJI?si=3R-AYClnHOMFhWFA
+# LINK VÍDEO DO PROJETO DEVOPS: https://youtu.be/YGUXJc8oY7I?si=PcTfL5iYmBmq6pm8
+
+# LINK VÍDEO DO PROJETO JAVA: https://youtu.be/ISrdKnZzQEE?si=CwyzRKHcDqVVNHWh
 
 API REST de gestão de Pátios, Automóveis e Operadores (Java 17 + Spring Boot + JPA + PostgreSQL). Contém endpoints públicos para CRUD, paginação e filtros.
 
