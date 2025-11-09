@@ -26,22 +26,27 @@ parameters:
   default: 'notesolutions'
 
 variables:
-  - group: vg-segredos-notesolutions   # <-- puxa PGPASS como segredo
-  PGADMIN: 'pgadmin'
-  DBNAME: 'note'
-  JAVA_VERSION: '17'
-  SKU_PLAN: 'B1'
-  PG_TIER: 'Burstable'
-  PG_SKU: 'Standard_B1ms'
-  PG_VERSION: '16'
+- group: vg-segredos-notesolutions   # contém PGPASS como segredo
 
-  RG: '$(prefix)-rg'
-  PGSERVER: '$(prefix)-pg'
-  PLAN: '$(prefix)-plan'
-  APP: '$(prefix)-app'
+# variáveis simples
+- name: PREFIX
+  value: ${{ parameters.prefix }}
+- name: PGADMIN
+  value: pgadmin
+- name: DBNAME
+  value: note
+- name: JAVA_VERSION
+  value: '17'
+- name: SKU_PLAN
+  value: B1
+- name: PG_TIER
+  value: Burstable
+- name: PG_SKU
+  value: Standard_B1ms
+- name: PG_VERSION
+  value: '16'
 
 stages:
-
 # =======================
 # 1) INFRA
 # =======================
@@ -66,20 +71,22 @@ stages:
           set -euo pipefail
 
           # -------- Variáveis --------
-          PREFIX='${{ parameters.prefix }}'
+          PREFIX='$(PREFIX)'
           LOC='${{ parameters.location }}'
-          RG='$(RG)'
-          PGSERVER='$(PGSERVER)'
           PGADMIN='$(PGADMIN)'
           PGPASS='$(PGPASS)'
           DBNAME='$(DBNAME)'
-          PLAN='$(PLAN)'
-          APP='$(APP)'
           PG_TIER='$(PG_TIER)'
           PG_SKU='$(PG_SKU)'
           PG_VERSION='$(PG_VERSION)'
           SKU_PLAN='$(SKU_PLAN)'
           JAVA_VERSION='$(JAVA_VERSION)'
+
+          # derivados
+          RG="${PREFIX}-rg"
+          PGSERVER="${PREFIX}-pg"
+          PLAN="${PREFIX}-plan"
+          APP="${PREFIX}-app"
 
           echo "### Criando/checando Resource Group"
           az group create -n "$RG" -l "$LOC" 1>/dev/null
@@ -130,73 +137,4 @@ stages:
           echo "### Configurando App Settings (SPRING_DATASOURCE_*, JAVA_OPTS, SCM_DO_BUILD_DURING_DEPLOYMENT)"
           JDBC_URL="jdbc:postgresql://${PGSERVER}.postgres.database.azure.com:5432/${DBNAME}?sslmode=require"
 
-          az webapp config appsettings set -g "$RG" -n "$APP" --settings \
-            SPRING_DATASOURCE_URL="$JDBC_URL" \
-            SPRING_DATASOURCE_USERNAME="$PGADMIN" \
-            SPRING_DATASOURCE_PASSWORD="$PGPASS" \
-            JAVA_OPTS="-Xms256m -Xmx512m" \
-            SCM_DO_BUILD_DURING_DEPLOYMENT=false
-
-# =======================
-# 2) BUILD (Maven)
-# =======================
-- stage: Build
-  displayName: 'Build (Maven)'
-  dependsOn: []
-  jobs:
-  - job: MavenBuild
-    displayName: 'Compilar JAR com Maven Wrapper'
-    pool:
-      vmImage: 'ubuntu-latest'
-    steps:
-    - checkout: self
-
-    - bash: |
-        set -euo pipefail
-        chmod +x mvnw || true
-        ./mvnw -ntp -DskipTests clean package
-      displayName: 'mvnw clean package (skipTests)'
-
-    - bash: |
-        echo "Artefatos produzidos:"
-        ls -lh target/*.jar
-      displayName: 'Listar artefatos'
-
-    - publish: $(System.DefaultWorkingDirectory)/target
-      artifact: drop
-      displayName: 'Publicar artefatos'
-
-# =======================
-# 3) DEPLOY
-# =======================
-- stage: Deploy
-  displayName: 'Deploy para Azure Web App'
-  dependsOn:
-    - Build
-  jobs:
-  - job: DeployJar
-    displayName: 'Deploy do JAR no Web App'
-    pool:
-      vmImage: 'ubuntu-latest'
-    steps:
-    - download: current
-      artifact: drop
-
-    - task: AzureCLI@2
-      displayName: 'Deploy via az webapp deploy --type jar'
-      inputs:
-        azureSubscription: '${{ parameters.azureServiceConnection }}'
-        scriptType: bash
-        scriptLocation: inlineScript
-        inlineScript: |
-          set -euo pipefail
-          RG='$(prefix)-rg'
-          APP='$(prefix)-app'
-
-          JAR_PATH="$(ls $(Pipeline.Workspace)/drop/*.jar | head -n1)"
-          echo "Fazendo deploy de: $JAR_PATH"
-
-          az webapp deploy -g "$RG" -n "$APP" --src-path "$JAR_PATH" --type jar
-
-          echo "URL do app:"
-          az webapp show -g "$RG" -n "$APP" --query defaultHostName -o tsv
+          az webapp config ap
